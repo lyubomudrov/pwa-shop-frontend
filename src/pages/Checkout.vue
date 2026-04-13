@@ -75,18 +75,18 @@
 
       <section class="section action-block">
         <button
-  class="order-btn"
-  :disabled="isOffline || cart.items.length === 0 || !selectedAddressId || creatingOrder"
-  @click="submitOrder"
->
-  {{
-    isOffline
-      ? 'Оформление недоступно оффлайн'
-      : creatingOrder
-        ? 'Оформляем...'
-        : 'Оформить заказ'
-  }}
-</button>
+          class="order-btn"
+          :disabled="isOffline || cart.items.length === 0 || !selectedAddressId || creatingOrder"
+          @click="submitOrder"
+        >
+          {{
+            isOffline
+              ? 'Оформление недоступно оффлайн'
+              : creatingOrder
+                ? 'Оформляем...'
+                : 'Оформить заказ'
+          }}
+        </button>
 
         <p v-if="error" class="error">{{ error }}</p>
         <p v-if="success" class="success">{{ success }}</p>
@@ -96,12 +96,11 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../store/cartStore'
 import { addressService } from '../services/addressService'
 import { orderService } from '../services/orderService'
-import { computed, onMounted, reactive, ref } from 'vue'
 
 const router = useRouter()
 const cart = useCartStore()
@@ -201,9 +200,9 @@ const submitOrder = async () => {
   success.value = ''
 
   if (!navigator.onLine) {
-  error.value = 'Для оформления заказа нужно подключение к интернету.'
-  return
-}
+    error.value = 'Для оформления заказа нужно подключение к интернету.'
+    return
+  }
 
   if (!selectedAddressId.value) {
     error.value = 'Выберите адрес доставки.'
