@@ -1,5 +1,14 @@
 <template>
   <div>
+    <div v-if="!isOnline" class="network-banner offline">
+      Вы оффлайн. Каталог и корзина работают локально.
+    </div>
+
+    <div v-else-if="cart.pendingCount > 0 || cart.isSyncing" class="network-banner syncing">
+      <span v-if="cart.isSyncing">Синхронизируем локальные изменения...</span>
+      <span v-else>Есть несинхронизированные изменения: {{ cart.pendingCount }}</span>
+    </div>
+
     <nav class="nav">
       <div class="nav-left">
         <RouterLink to="/">Товары</RouterLink>
@@ -28,24 +37,57 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from './store/authStore'
+import { useCartStore } from './store/cartStore'
+import { useOnline } from './composables/useOnline'
 
 const auth = useAuthStore()
+const cart = useCartStore()
 const router = useRouter()
+const { isOnline } = useOnline()
 
-onMounted(() => {
-  auth.initAuth()
+onMounted(async () => {
+  await auth.initAuth()
+  await cart.initOfflineState()
+
+  if (auth.isAuthenticated) {
+    await cart.loadCart()
+    await cart.syncPendingActions()
+  }
 })
 
-const logout = () => {
+watch(isOnline, async (online) => {
+  if (online && auth.isAuthenticated) {
+    await cart.syncPendingActions()
+  }
+})
+
+const logout = async () => {
   auth.logout()
+  await cart.clearCart()
   router.push('/login')
 }
 </script>
 
 <style scoped>
+.network-banner {
+  padding: 10px 16px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.offline {
+  background: #fff3cd;
+  color: #7a5a00;
+}
+
+.syncing {
+  background: #e8f0fe;
+  color: #174ea6;
+}
+
 .nav {
   display: flex;
   justify-content: space-between;
