@@ -5,6 +5,10 @@ import localforage from 'localforage'
 const CART_STORAGE_KEY = 'cart_current_user'
 const CART_QUEUE_KEY = 'cart_pending_actions'
 
+function isNetworkError(err) {
+  return !err?.response
+}
+
 export const useCartStore = defineStore('cart', {
   state: () => ({
     items: [],
@@ -42,8 +46,12 @@ export const useCartStore = defineStore('cart', {
         this.items = res.data
         await this.persistItems()
       } catch (err) {
-        this.items = (await localforage.getItem(CART_STORAGE_KEY)) || []
-        console.warn('Ошибка загрузки корзины, используем оффлайн данные', err)
+        if (isNetworkError(err)) {
+          this.items = (await localforage.getItem(CART_STORAGE_KEY)) || []
+          console.warn('Ошибка загрузки корзины, используем оффлайн данные', err)
+        } else {
+          throw err
+        }
       } finally {
         this.isLoading = false
       }
@@ -74,38 +82,44 @@ export const useCartStore = defineStore('cart', {
 
         await this.persistItems()
         await this.persistQueue()
-        return
+        return { queuedOffline: true }
       }
 
       try {
         await cartService.addToCart(productId, quantity)
         await this.loadCart()
+        return { queuedOffline: false }
       } catch (err) {
-        console.warn('Ошибка добавления в корзину, сохраняем действие локально', err)
+        if (isNetworkError(err)) {
+          console.warn('Сетевая ошибка, сохраняем действие локально', err)
 
-        const existing = this.items.find(i => i.productId === productId)
+          const existing = this.items.find(i => i.productId === productId)
 
-        if (existing) {
-          existing.quantity += quantity
-        } else {
-          this.items.push({
-            id: `offline-${Date.now()}`,
+          if (existing) {
+            existing.quantity += quantity
+          } else {
+            this.items.push({
+              id: `offline-${Date.now()}`,
+              productId,
+              quantity,
+              productName: `Товар #${productId}`,
+              offline: true
+            })
+          }
+
+          this.pendingActions.push({
+            type: 'add',
             productId,
             quantity,
-            productName: `Товар #${productId}`,
-            offline: true
+            createdAt: new Date().toISOString()
           })
+
+          await this.persistItems()
+          await this.persistQueue()
+          return { queuedOffline: true }
         }
 
-        this.pendingActions.push({
-          type: 'add',
-          productId,
-          quantity,
-          createdAt: new Date().toISOString()
-        })
-
-        await this.persistItems()
-        await this.persistQueue()
+        throw err
       }
     },
 
@@ -124,26 +138,32 @@ export const useCartStore = defineStore('cart', {
 
         await this.persistItems()
         await this.persistQueue()
-        return
+        return { queuedOffline: true }
       }
 
       try {
         await cartService.removeItem(cartItemId)
         await this.loadCart()
+        return { queuedOffline: false }
       } catch (err) {
-        console.warn('Ошибка удаления из корзины, сохраняем действие локально', err)
+        if (isNetworkError(err)) {
+          console.warn('Сетевая ошибка, сохраняем удаление локально', err)
 
-        this.items = this.items.filter(i => i.id !== cartItemId)
+          this.items = this.items.filter(i => i.id !== cartItemId)
 
-        this.pendingActions.push({
-          type: 'remove',
-          cartItemId,
-          productId: existing?.productId || null,
-          createdAt: new Date().toISOString()
-        })
+          this.pendingActions.push({
+            type: 'remove',
+            cartItemId,
+            productId: existing?.productId || null,
+            createdAt: new Date().toISOString()
+          })
 
-        await this.persistItems()
-        await this.persistQueue()
+          await this.persistItems()
+          await this.persistQueue()
+          return { queuedOffline: true }
+        }
+
+        throw err
       }
     },
 

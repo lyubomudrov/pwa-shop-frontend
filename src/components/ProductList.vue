@@ -42,9 +42,27 @@ onMounted(async () => {
 
 const addToCart = async (product) => {
   try {
-    await cart.addProduct(product.id, 1)
+    const result = await cart.addProduct(product.id, 1)
+
+    if (result?.queuedOffline) {
+      alert('Нет интернета. Товар сохранен локально и будет синхронизирован позже.')
+      return
+    }
+
     alert('Товар добавлен в корзину')
   } catch (error) {
+    const status = error?.response?.status
+
+    if (status === 401 || status === 403) {
+      alert('Чтобы добавить товар в корзину, сначала войдите в аккаунт.')
+      return
+    }
+
+    if (status === 400) {
+      alert(error?.response?.data?.message || 'Не удалось добавить товар в корзину.')
+      return
+    }
+
     alert('Не удалось добавить товар в корзину')
   }
 }
