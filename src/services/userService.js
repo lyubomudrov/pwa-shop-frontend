@@ -1,6 +1,7 @@
 import { api } from './api'
 
 export const userService = {
-  create: (user) => api.post('/users', user),
+  getMe: () => api.get('/users/me'),
+  getAll: () => api.get('/users'),
   getById: (id) => api.get(`/users/${id}`)
 }

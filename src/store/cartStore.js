@@ -2,48 +2,58 @@ import { defineStore } from 'pinia'
 import { cartService } from '../services/cartService'
 import localforage from 'localforage'
 
+const CART_STORAGE_KEY = 'cart_current_user'
+
 export const useCartStore = defineStore('cart', {
   state: () => ({
-    items: []
+    items: [],
+    isLoading: false
   }),
+
+  getters: {
+    totalItems: (state) =>
+      state.items.reduce((sum, item) => sum + (item.quantity || 0), 0)
+  },
+
   actions: {
-    async loadCart(userId) {
+    async loadCart() {
+      this.isLoading = true
+
       try {
-        const res = await cartService.getCart(userId)
+        const res = await cartService.getCart()
         this.items = res.data
-        // сохраняем оффлайн, только чистые данные
-        await localforage.setItem(`cart_${userId}`, JSON.parse(JSON.stringify(this.items)))
+        await localforage.setItem(CART_STORAGE_KEY, JSON.parse(JSON.stringify(this.items)))
       } catch (err) {
-        this.items = (await localforage.getItem(`cart_${userId}`)) || []
+        this.items = (await localforage.getItem(CART_STORAGE_KEY)) || []
         console.warn('Ошибка загрузки корзины, используем оффлайн данные', err)
+      } finally {
+        this.isLoading = false
       }
     },
 
-    async addProduct(userId, productId, quantity) {
+    async addProduct(productId, quantity = 1) {
       try {
-        await cartService.addToCart(userId, productId, quantity)
-        await this.loadCart(userId)
+        await cartService.addToCart(productId, quantity)
+        await this.loadCart()
       } catch (err) {
-        const index = this.items.findIndex(i => i.productId === productId)
-        if (index >= 0) {
-          this.items[index].quantity += quantity
-        } else {
-          this.items.push({ productId, quantity })
-        }
-        await localforage.setItem(`cart_${userId}`, JSON.parse(JSON.stringify(this.items)))
-        console.warn('Добавлено в корзину локально (офлайн)', err)
+        console.warn('Ошибка добавления в корзину', err)
+        throw err
       }
     },
 
-    async removeItem(cartItemId, userId) {
+    async removeItem(cartItemId) {
       try {
         await cartService.removeItem(cartItemId)
-        await this.loadCart(userId)
+        await this.loadCart()
       } catch (err) {
-        this.items = this.items.filter(i => i.id !== cartItemId)
-        await localforage.setItem(`cart_${userId}`, JSON.parse(JSON.stringify(this.items)))
-        console.warn('Удалено из корзины локально (офлайн)', err)
+        console.warn('Ошибка удаления из корзины', err)
+        throw err
       }
+    },
+
+    clearCart() {
+      this.items = []
+      localforage.removeItem(CART_STORAGE_KEY)
     }
   }
 })

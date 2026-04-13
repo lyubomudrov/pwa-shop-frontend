@@ -1,17 +1,35 @@
 <template>
-  <nav>
-    <button @click="page='products'">Товары</button>
-    <button @click="page='cart'">Корзина</button>
-  </nav>
+  <div>
+    <nav class="nav">
+      <RouterLink to="/">Товары</RouterLink>
+      <RouterLink to="/cart">Корзина</RouterLink>
+      <button v-if="auth.isAuthenticated" @click="logout">Выйти</button>
+    </nav>
 
-  <ProductList v-if="page==='products'" />
-  <Cart v-else />
+    <router-view />
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import ProductList from './components/ProductList.vue'
-import Cart from './components/Cart.vue'
+import { onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
+import { useAuthStore } from './store/authStore'
 
-const page = ref('products')
+const auth = useAuthStore()
+
+onMounted(() => {
+  auth.initAuth()
+})
+
+const logout = () => {
+  auth.logout()
+}
 </script>
+
+<style scoped>
+.nav {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+}
+</style>

@@ -1,8 +1,7 @@
 <template>
-  <div>
-    <h1>Корзина</h1>
-  </div>
+  <CartComponent />
 </template>
 
 <script setup>
+import CartComponent from '../components/Cart.vue'
 </script>

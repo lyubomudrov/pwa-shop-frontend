@@ -4,12 +4,16 @@
 
     <div class="grid">
       <div class="card" v-for="p in products" :key="p.id">
-        <img v-if="p.imageUrl" :src="p.imageUrl" />
+        <img v-if="p.imageUrl" :src="p.imageUrl" :alt="p.name" />
         <h3>{{ p.name }}</h3>
         <p>{{ p.price }} ₽</p>
+        <p>В наличии: {{ p.stockQuantity }}</p>
 
-        <button @click="addToCart(p)">
-          В корзину
+        <button
+          :disabled="!p.available || p.stockQuantity <= 0"
+          @click="addToCart(p)"
+        >
+          {{ !p.available || p.stockQuantity <= 0 ? 'Нет в наличии' : 'В корзину' }}
         </button>
       </div>
     </div>
@@ -23,15 +27,12 @@ import { useCartStore } from '../store/cartStore'
 import localforage from 'localforage'
 
 const cart = useCartStore()
-const userId = 4 // позже можно генерировать уникальный ID
-
 const products = ref([])
 
 onMounted(async () => {
   try {
     const res = await api.get('/products')
     products.value = res.data
-    // сохраняем только чистые данные оффлайн
     await localforage.setItem('products', JSON.parse(JSON.stringify(products.value)))
   } catch {
     products.value = (await localforage.getItem('products')) || []
@@ -40,7 +41,12 @@ onMounted(async () => {
 })
 
 const addToCart = async (product) => {
-  await cart.addProduct(userId, product.id, 1)
+  try {
+    await cart.addProduct(product.id, 1)
+    alert('Товар добавлен в корзину')
+  } catch (error) {
+    alert('Не удалось добавить товар в корзину')
+  }
 }
 </script>
 
@@ -53,5 +59,13 @@ const addToCart = async (product) => {
 .card {
   border: 1px solid #ccc;
   padding: 12px;
+}
+img {
+  max-width: 100%;
+  height: auto;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

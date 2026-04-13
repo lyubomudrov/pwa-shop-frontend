@@ -1,7 +1,12 @@
 import { api } from './api'
 
 export const orderService = {
-  createOrder: (userId, addressId) =>
-    api.post(`/orders?userId=${userId}&addressId=${addressId}`),
-  getOrdersByUser: (userId) => api.get(`/orders/user/${userId}`)
+  createOrder: (addressId) =>
+    api.post('/orders', {
+      addressId
+    }),
+
+  getMyOrders: () => api.get('/orders/my'),
+
+  getById: (orderId) => api.get(`/orders/${orderId}`)
 }
