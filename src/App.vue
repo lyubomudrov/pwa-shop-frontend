@@ -5,6 +5,7 @@
         <RouterLink to="/">Товары</RouterLink>
         <RouterLink v-if="auth.isAuthenticated" to="/cart">Корзина</RouterLink>
         <RouterLink v-if="auth.isAuthenticated" to="/checkout">Оформление</RouterLink>
+        <RouterLink v-if="auth.isAuthenticated" to="/orders">Мои заказы</RouterLink>
       </div>
 
       <div class="nav-right">
@@ -59,6 +60,7 @@ const logout = () => {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .container {
