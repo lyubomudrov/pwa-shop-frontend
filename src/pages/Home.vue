@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Каталог товаров</h1>
+    
     <ProductList />
   </div>
 </template>
