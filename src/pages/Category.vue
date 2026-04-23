@@ -1,62 +1,72 @@
 <template>
   <div class="category-page">
-    <div class="page-header">
+    <section class="hero-card">
       <div>
-        <p class="breadcrumb">Каталог / Категория</p>
+        <p class="eyebrow">Каталог</p>
         <h1>{{ categoryTitle }}</h1>
+        <p class="description">
+          {{ categoryDescription || 'Собрали товары этой категории в одном месте.' }}
+        </p>
       </div>
 
-      <RouterLink to="/" class="back-link">← На главную</RouterLink>
-    </div>
+      <div class="hero-actions">
+        <RouterLink to="/" class="secondary-link">← На главную</RouterLink>
+        <span class="count-pill">{{ productsStore.products.length }} товаров</span>
+      </div>
+    </section>
 
-    <div v-if="productsStore.isLoadingProducts" class="info-box">
-      Загрузка товаров категории...
-    </div>
+    <section class="section-card">
+      <div v-if="productsStore.isLoadingProducts" class="info-text">
+        Загружаем товары категории...
+      </div>
 
-    <div v-else-if="productsStore.products.length === 0" class="info-box">
-      В этой категории пока нет товаров.
-    </div>
+      <div v-else-if="productsStore.products.length === 0" class="info-text">
+        В этой категории пока нет товаров.
+      </div>
 
-    <div v-else class="products-grid">
-      <article
-        v-for="product in productsStore.products"
-        :key="product.id"
-        class="product-card"
-      >
-        <div class="product-card__body">
-          <img
-            v-if="product.imageUrl"
-            :src="product.imageUrl"
-            :alt="product.name"
-            class="product-image"
-          />
+      <div v-else class="products-grid">
+        <article v-for="product in productsStore.products" :key="product.id" class="product-card">
+          <RouterLink :to="`/products/${product.id}`" class="product-card__media">
+            <img
+              v-if="product.imageUrl"
+              :src="product.imageUrl"
+              :alt="product.name"
+              class="product-image"
+            />
+            <div v-else class="placeholder">Нет изображения</div>
+          </RouterLink>
 
-          <h3>{{ product.name }}</h3>
+          <div class="product-card__body">
+            <RouterLink :to="`/products/${product.id}`" class="title-link">
+              <h3>{{ product.name }}</h3>
+            </RouterLink>
 
-          <p class="description">
-            {{ product.description || 'Описание пока отсутствует.' }}
-          </p>
+            <p class="product-description">
+              {{ product.description || 'Описание для товара пока не добавлено.' }}
+            </p>
 
-          <div class="meta-row">
-            <span class="price">{{ product.price }} ₽</span>
-            <span class="stock">
-              Остаток: {{ product.stockQuantity ?? product.quantity ?? '—' }}
-            </span>
+            <div class="meta-row">
+              <strong>{{ formatPrice(product.price) }}</strong>
+              <span>Остаток: {{ product.stockQuantity ?? 0 }}</span>
+            </div>
+
+            <div class="actions">
+              <button
+                class="cart-btn"
+                :disabled="!product.available || product.stockQuantity <= 0"
+                @click="addToCart(product)"
+              >
+                {{ !product.available || product.stockQuantity <= 0 ? 'Нет в наличии' : 'В корзину' }}
+              </button>
+              <RouterLink :to="`/products/${product.id}`" class="secondary-link">Подробнее</RouterLink>
+            </div>
           </div>
+        </article>
+      </div>
 
-          <button
-            class="cart-btn"
-            :disabled="!product.available || product.stockQuantity <= 0"
-            @click="addToCart(product)"
-          >
-            {{ !product.available || product.stockQuantity <= 0 ? 'Нет в наличии' : 'В корзину' }}
-          </button>
-        </div>
-      </article>
-    </div>
-
-    <p v-if="message" class="success">{{ message }}</p>
-    <p v-if="error" class="error">{{ error }}</p>
+      <p v-if="message" class="success">{{ message }}</p>
+      <p v-if="error" class="error">{{ error }}</p>
+    </section>
   </div>
 </template>
 
@@ -74,11 +84,18 @@ const error = ref('')
 const message = ref('')
 
 const categoryId = computed(() => Number(route.params.id))
+const currentCategory = computed(() =>
+  productsStore.categories.find((category) => category.id === categoryId.value)
+)
+const categoryTitle = computed(() => currentCategory.value?.name || `Категория #${categoryId.value}`)
+const categoryDescription = computed(() => currentCategory.value?.description || '')
 
-const categoryTitle = computed(() => {
-  const current = productsStore.categories.find(c => c.id === categoryId.value)
-  return current?.name || `Категория #${categoryId.value}`
-})
+const formatPrice = (value) =>
+  new Intl.NumberFormat('ru-RU', {
+    style: 'currency',
+    currency: 'RUB',
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0))
 
 const loadCategoryData = async () => {
   error.value = ''
@@ -104,7 +121,7 @@ const addToCart = async (product) => {
     const result = await cart.addProduct(product.id, 1)
 
     if (result?.queuedOffline) {
-      message.value = 'Нет интернета. Товар сохранен локально и будет синхронизирован позже.'
+      message.value = 'Нет интернета. Товар сохранён локально и будет синхронизирован позже.'
       return
     }
 
@@ -112,8 +129,13 @@ const addToCart = async (product) => {
   } catch (err) {
     const status = err?.response?.status
 
-    if (status === 401 || status === 403) {
+    if (status === 401) {
       error.value = 'Чтобы добавить товар в корзину, сначала войдите в аккаунт.'
+      return
+    }
+
+    if (status === 403) {
+      error.value = 'Сервер отклонил добавление товара в корзину для текущего пользователя.'
       return
     }
 
@@ -126,53 +148,85 @@ const addToCart = async (product) => {
   }
 }
 
-onMounted(() => {
-  loadCategoryData()
-})
-
-watch(() => route.params.id, () => {
-  loadCategoryData()
-})
+onMounted(loadCategoryData)
+watch(() => route.params.id, loadCategoryData)
 </script>
 
 <style scoped>
 .category-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 16px 40px;
+  display: grid;
+  gap: 24px;
 }
 
-.page-header {
+.hero-card,
+.section-card {
+  border: 1px solid var(--border-soft);
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.hero-card {
+  padding: 26px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 18px;
 }
 
-.breadcrumb {
-  margin: 0 0 6px;
-  color: #777;
-  font-size: 14px;
+.eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  color: var(--accent-strong);
+  font-weight: 700;
 }
 
-h1 {
+.hero-card h1 {
   margin: 0;
-  font-size: 32px;
 }
 
-.back-link {
-  text-decoration: none;
-  color: #111;
-  font-weight: 600;
+.description,
+.product-description,
+.meta-row span,
+.info-text {
+  color: var(--text-soft);
 }
 
-.info-box {
-  padding: 18px;
-  border: 1px solid #e5e5e5;
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.secondary-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 16px;
   border-radius: 14px;
-  color: #666;
-  background: #fafafa;
+  border: 1px solid var(--border-soft);
+  background: white;
+  color: var(--text-strong);
+  text-decoration: none;
+}
+
+.count-pill {
+  min-height: 42px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(31, 111, 95, 0.12);
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.section-card {
+  padding: 24px;
 }
 
 .products-grid {
@@ -182,83 +236,74 @@ h1 {
 }
 
 .product-card {
-  border: 1px solid #e8e8e8;
-  border-radius: 16px;
-  background: #fff;
+  display: grid;
+  border-radius: 24px;
+  border: 1px solid rgba(28, 35, 32, 0.08);
+  background: rgba(255, 255, 255, 0.82);
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-}
-
-.product-card__body {
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.product-card__media {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at top, rgba(239, 131, 84, 0.18), transparent 38%),
+    linear-gradient(180deg, #fff8ef, #eef5f1);
+  padding: 20px;
 }
 
 .product-image {
   width: 100%;
   height: 180px;
   object-fit: contain;
-  border-radius: 12px;
-  background: #f7f7f7;
 }
 
-.product-card h3 {
+.placeholder {
+  color: var(--text-soft);
+}
+
+.product-card__body {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.title-link h3 {
   margin: 0;
-  font-size: 20px;
 }
 
-.description {
-  margin: 0;
-  color: #666;
-  min-height: 44px;
-}
-
-.meta-row {
+.meta-row,
+.actions {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
-}
-
-.price {
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.stock {
-  color: #555;
-  font-size: 14px;
+  align-items: center;
 }
 
 .cart-btn {
-  border: none;
-  border-radius: 10px;
-  background: #111;
-  color: white;
-  padding: 12px 14px;
-  cursor: pointer;
-}
-
-.cart-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  background: var(--accent-strong);
 }
 
 .success {
   margin-top: 18px;
-  color: #2e7d32;
+  color: #157347;
 }
 
 .error {
   margin-top: 18px;
-  color: #c62828;
+  color: #b42318;
+}
+
+@media (max-width: 900px) {
+  .hero-card {
+    flex-direction: column;
+  }
 }
 </style>

@@ -7,6 +7,10 @@ import Checkout from '../pages/Checkout.vue'
 import Login from '../pages/Login.vue'
 import Register from '../pages/Register.vue'
 import Orders from '../pages/Orders.vue'
+import ProductDetails from '../pages/ProductDetails.vue'
+import Profile from '../pages/Profile.vue'
+import AdminProducts from '../pages/AdminProducts.vue'
+import AdminCategories from '../pages/AdminCategories.vue'
 
 const routes = [
   {
@@ -18,6 +22,12 @@ const routes = [
     path: '/category/:id',
     name: 'category',
     component: Category,
+    props: true,
+  },
+  {
+    path: '/products/:id',
+    name: 'product-details',
+    component: ProductDetails,
     props: true,
   },
   {
@@ -37,6 +47,24 @@ const routes = [
     name: 'orders',
     component: Orders,
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: Profile,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/admin/products',
+    name: 'admin-products',
+    component: AdminProducts,
+    meta: { requiresAuth: true, adminOnly: true },
+  },
+  {
+    path: '/admin/categories',
+    name: 'admin-categories',
+    component: AdminCategories,
+    meta: { requiresAuth: true, adminOnly: true },
   },
   {
     path: '/login',
@@ -59,7 +87,9 @@ export const router = createRouter({
 
 router.beforeEach((to) => {
   const token = localStorage.getItem('token')
+  const role = localStorage.getItem('role')
   const isAuthenticated = !!token
+  const isAdmin = role === 'ADMIN' || role === 'ROLE_ADMIN'
 
   if (to.meta.requiresAuth && !isAuthenticated) {
     return {
@@ -69,6 +99,10 @@ router.beforeEach((to) => {
   }
 
   if (to.meta.guestOnly && isAuthenticated) {
+    return '/'
+  }
+
+  if (to.meta.adminOnly && !isAdmin) {
     return '/'
   }
 

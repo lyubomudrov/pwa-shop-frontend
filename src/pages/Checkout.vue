@@ -1,41 +1,62 @@
 <template>
   <div class="checkout-page">
-    <h1>Оформление заказа</h1>
+    <section class="hero-card">
+      <div>
+        <p class="eyebrow">Оформление заказа</p>
+        <h1>Финальный шаг перед покупкой</h1>
+        <p class="subtitle">
+          Выберите адрес, проверьте корзину и подтвердите оформление заказа.
+        </p>
+      </div>
 
-    <div v-if="loading">Загрузка...</div>
+      <div class="summary-card">
+        <span>Товаров в корзине</span>
+        <strong>{{ cart.totalItems }}</strong>
+      </div>
+    </section>
 
-    <div v-else>
-      <section class="section">
-        <h2>Моя корзина</h2>
+    <div v-if="loading" class="panel">Загрузка...</div>
 
-        <div v-if="cart.items.length === 0">
+    <div v-else class="checkout-grid">
+      <section class="panel">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Корзина</p>
+            <h2>Ваши товары</h2>
+          </div>
+          <RouterLink class="soft-link" to="/cart">Открыть корзину</RouterLink>
+        </div>
+
+        <div v-if="cart.items.length === 0" class="info-text">
           Корзина пуста. Сначала добавьте товары.
         </div>
 
         <div v-else class="cart-list">
-          <div v-for="item in cart.items" :key="item.id" class="cart-item">
+          <article v-for="item in cart.items" :key="item.id" class="cart-item">
             <div>
               <strong>{{ item.productName || item.name || `Товар #${item.productId}` }}</strong>
+              <p>Количество: {{ item.quantity }}</p>
             </div>
-            <div>Количество: {{ item.quantity }}</div>
-            <div v-if="item.purchasePrice">Цена: {{ item.purchasePrice }} ₽</div>
-          </div>
+            <span v-if="item.purchasePrice">{{ formatPrice(item.purchasePrice) }}</span>
+          </article>
         </div>
       </section>
 
-      <section class="section">
-        <h2>Мои адреса</h2>
+      <section class="panel">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Доставка</p>
+            <h2>Выберите адрес</h2>
+          </div>
+          <RouterLink class="soft-link" to="/profile">Управление адресами</RouterLink>
+        </div>
 
-        <div v-if="addresses.length === 0" class="empty-block">
+        <div v-if="addresses.length === 0" class="info-text">
           У вас пока нет адресов. Создайте адрес ниже.
         </div>
 
         <div v-else class="address-list">
-          <label
-            v-for="address in addresses"
-            :key="address.id"
-            class="address-card"
-          >
+          <label v-for="address in addresses" :key="address.id" class="address-card">
             <input
               v-model="selectedAddressId"
               type="radio"
@@ -47,19 +68,11 @@
               <div>{{ address.street }}, {{ address.houseNumber }}</div>
               <div>{{ address.postalCode }}</div>
             </div>
-            <button
-              type="button"
-              class="delete-btn"
-              @click.prevent="removeAddress(address.id)"
-            >
+            <button type="button" class="danger-button" @click.prevent="removeAddress(address.id)">
               Удалить
             </button>
           </label>
         </div>
-      </section>
-
-      <section class="section">
-        <h2>Новый адрес</h2>
 
         <form class="address-form" @submit.prevent="createAddress">
           <input v-model="form.city" type="text" placeholder="Город" required />
@@ -67,37 +80,37 @@
           <input v-model="form.houseNumber" type="text" placeholder="Дом" required />
           <input v-model="form.postalCode" type="text" placeholder="Почтовый индекс" required />
 
-          <button type="submit" :disabled="creatingAddress">
-            {{ creatingAddress ? 'Сохраняем...' : 'Сохранить адрес' }}
+          <button :disabled="creatingAddress">
+            {{ creatingAddress ? 'Сохраняем...' : 'Добавить адрес' }}
           </button>
         </form>
       </section>
-
-      <section class="section action-block">
-        <button
-          class="order-btn"
-          :disabled="isOffline || cart.items.length === 0 || !selectedAddressId || creatingOrder"
-          @click="submitOrder"
-        >
-          {{
-            isOffline
-              ? 'Оформление недоступно оффлайн'
-              : creatingOrder
-                ? 'Оформляем...'
-                : 'Оформить заказ'
-          }}
-        </button>
-
-        <p v-if="error" class="error">{{ error }}</p>
-        <p v-if="success" class="success">{{ success }}</p>
-      </section>
     </div>
+
+    <section class="panel action-panel">
+      <button
+        class="order-btn"
+        :disabled="isOffline || cart.items.length === 0 || !selectedAddressId || creatingOrder"
+        @click="submitOrder"
+      >
+        {{
+          isOffline
+            ? 'Оформление недоступно оффлайн'
+            : creatingOrder
+              ? 'Оформляем...'
+              : 'Оформить заказ'
+        }}
+      </button>
+
+      <p v-if="error" class="error">{{ error }}</p>
+      <p v-if="success" class="success">{{ success }}</p>
+    </section>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { useCartStore } from '../store/cartStore'
 import { addressService } from '../services/addressService'
 import { orderService } from '../services/orderService'
@@ -119,12 +132,19 @@ const form = reactive({
   city: '',
   street: '',
   houseNumber: '',
-  postalCode: ''
+  postalCode: '',
 })
+
+const formatPrice = (value) =>
+  new Intl.NumberFormat('ru-RU', {
+    style: 'currency',
+    currency: 'RUB',
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0))
 
 const loadAddresses = async () => {
   const res = await addressService.getMyAddresses()
-  addresses.value = res.data
+  addresses.value = Array.isArray(res.data) ? res.data : []
 
   if (addresses.value.length > 0 && !selectedAddressId.value) {
     selectedAddressId.value = addresses.value[0].id
@@ -156,7 +176,7 @@ const createAddress = async () => {
       city: form.city,
       street: form.street,
       houseNumber: form.houseNumber,
-      postalCode: form.postalCode
+      postalCode: form.postalCode,
     })
 
     addresses.value.push(res.data)
@@ -182,13 +202,13 @@ const removeAddress = async (addressId) => {
 
   try {
     await addressService.deleteAddress(addressId)
-    addresses.value = addresses.value.filter(a => a.id !== addressId)
+    addresses.value = addresses.value.filter((address) => address.id !== addressId)
 
     if (selectedAddressId.value === addressId) {
       selectedAddressId.value = addresses.value.length ? addresses.value[0].id : null
     }
 
-    success.value = 'Адрес удален.'
+    success.value = 'Адрес удалён.'
   } catch (e) {
     error.value = 'Не удалось удалить адрес.'
     console.error(e)
@@ -228,66 +248,147 @@ const submitOrder = async () => {
   }
 }
 
-onMounted(() => {
-  loadPage()
-})
+onMounted(loadPage)
 </script>
 
 <style scoped>
 .checkout-page {
-  max-width: 900px;
-  margin: 0 auto;
+  display: grid;
+  gap: 24px;
 }
-.section {
-  margin-bottom: 28px;
-  padding: 16px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+
+.hero-card,
+.panel {
+  border: 1px solid var(--border-soft);
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
 }
-.cart-list,
-.address-list {
+
+.hero-card {
+  padding: 26px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: stretch;
 }
-.cart-item,
-.address-card {
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+
+.eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  color: var(--accent-strong);
+  font-weight: 700;
 }
-.address-card {
+
+.hero-card h1,
+.section-header h2 {
+  margin: 0;
+}
+
+.subtitle,
+.info-text,
+.cart-item p {
+  color: var(--text-soft);
+}
+
+.summary-card {
+  min-width: 220px;
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(28, 35, 32, 0.08);
+  display: grid;
+  gap: 8px;
+}
+
+.summary-card span {
+  color: var(--text-soft);
+}
+
+.summary-card strong {
+  font-size: 28px;
+}
+
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.panel {
+  padding: 24px;
+}
+
+.section-header {
   display: flex;
+  justify-content: space-between;
+  gap: 16px;
   align-items: flex-start;
-  gap: 12px;
+  margin-bottom: 18px;
 }
+
+.soft-link {
+  color: var(--accent-strong);
+  text-decoration: none;
+}
+
+.cart-list,
+.address-list,
 .address-form {
   display: grid;
-  gap: 12px;
-  max-width: 420px;
+  gap: 14px;
 }
-input {
-  padding: 10px;
-}
-.order-btn,
-button {
-  padding: 10px 14px;
-}
-.delete-btn {
-  margin-left: auto;
-}
-.action-block {
+
+.cart-item,
+.address-card {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(28, 35, 32, 0.08);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.address-card input {
+  width: auto;
+}
+
+.danger-button {
+  background: #b42318;
+}
+
+.action-panel {
+  display: grid;
   gap: 12px;
 }
-.error {
-  color: #c62828;
+
+.order-btn {
+  min-height: 52px;
 }
+
 .success {
-  color: #2e7d32;
+  color: #157347;
 }
-.empty-block {
-  color: #666;
+
+.error {
+  color: #b42318;
+}
+
+@media (max-width: 980px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-card,
+  .cart-item,
+  .address-card,
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 </style>

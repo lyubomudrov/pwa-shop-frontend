@@ -6,6 +6,7 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
     token: localStorage.getItem('token') || null,
+    role: localStorage.getItem('role') || null,
     isInitialized: false,
     isLoading: false,
   }),
@@ -14,7 +15,7 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state) => !!state.token,
 
     isAdmin: (state) => {
-      const role = state.user?.role
+      const role = state.role || state.user?.role
 
       return role === 'ADMIN' || role === 'ROLE_ADMIN'
     },
@@ -31,12 +32,36 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    setRole(role) {
+      this.role = role || null
+
+      if (role) {
+        localStorage.setItem('role', role)
+      } else {
+        localStorage.removeItem('role')
+      }
+    },
+
+    applyAuthResponse(payload) {
+      this.setToken(payload?.token)
+      this.setRole(payload?.role)
+
+      if (payload?.userId) {
+        this.user = {
+          id: payload.userId,
+          email: payload.email,
+          firstName: payload.firstName,
+          lastName: payload.lastName,
+        }
+      }
+    },
+
     async login(data) {
       this.isLoading = true
 
       try {
         const res = await api.post('/auth/login', data)
-        this.setToken(res.data.token)
+        this.applyAuthResponse(res.data)
         await this.fetchMe()
       } finally {
         this.isLoading = false
@@ -48,7 +73,7 @@ export const useAuthStore = defineStore('auth', {
 
       try {
         const res = await api.post('/auth/register', data)
-        this.setToken(res.data.token)
+        this.applyAuthResponse(res.data)
         await this.fetchMe()
       } finally {
         this.isLoading = false
@@ -58,6 +83,7 @@ export const useAuthStore = defineStore('auth', {
     async fetchMe() {
       if (!this.token) {
         this.user = null
+        this.role = null
         return null
       }
 
@@ -74,6 +100,7 @@ export const useAuthStore = defineStore('auth', {
     async initAuth() {
       if (!this.token) {
         this.user = null
+        this.role = null
         this.isInitialized = true
         return
       }
@@ -87,6 +114,7 @@ export const useAuthStore = defineStore('auth', {
 
     logout() {
       this.setToken(null)
+      this.setRole(null)
       this.user = null
       this.isInitialized = true
     },
