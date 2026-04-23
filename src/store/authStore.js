@@ -6,42 +6,60 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
     token: localStorage.getItem('token') || null,
-    isInitialized: false
+    isInitialized: false,
+    isLoading: false,
   }),
 
   getters: {
     isAuthenticated: (state) => !!state.token,
-    isAdmin: (state) => state.user?.role === 'ADMIN'
+    isAdmin: (state) => state.user?.role === 'ADMIN',
   },
 
   actions: {
+    setToken(token) {
+      this.token = token || null
+
+      if (token) {
+        localStorage.setItem('token', token)
+      } else {
+        localStorage.removeItem('token')
+      }
+    },
+
     async login(data) {
-      const res = await api.post('/auth/login', data)
+      this.isLoading = true
 
-      this.token = res.data.token
-      localStorage.setItem('token', res.data.token)
-
-      await this.fetchMe()
+      try {
+        const res = await api.post('/auth/login', data)
+        this.setToken(res.data.token)
+        await this.fetchMe()
+      } finally {
+        this.isLoading = false
+      }
     },
 
     async register(data) {
-      const res = await api.post('/auth/register', data)
+      this.isLoading = true
 
-      this.token = res.data.token
-      localStorage.setItem('token', res.data.token)
-
-      await this.fetchMe()
+      try {
+        const res = await api.post('/auth/register', data)
+        this.setToken(res.data.token)
+        await this.fetchMe()
+      } finally {
+        this.isLoading = false
+      }
     },
 
     async fetchMe() {
       if (!this.token) {
         this.user = null
-        return
+        return null
       }
 
       try {
         const res = await userService.getMe()
         this.user = res.data
+        return res.data
       } catch (error) {
         this.logout()
         throw error
@@ -50,6 +68,7 @@ export const useAuthStore = defineStore('auth', {
 
     async initAuth() {
       if (!this.token) {
+        this.user = null
         this.isInitialized = true
         return
       }
@@ -62,10 +81,9 @@ export const useAuthStore = defineStore('auth', {
     },
 
     logout() {
-      this.token = null
+      this.setToken(null)
       this.user = null
       this.isInitialized = true
-      localStorage.removeItem('token')
-    }
-  }
+    },
+  },
 })
