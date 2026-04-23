@@ -21,8 +21,6 @@
         <template v-if="auth.isAuthenticated">
           <div class="user-meta">
             <span class="user-email">{{ auth.user?.email }}</span>
-            <span class="user-role">role: {{ auth.user?.role }}</span>
-            <span class="user-role">isAdmin: {{ auth.isAdmin }}</span>
           </div>
           <button @click="logout">Выйти</button>
         </template>
