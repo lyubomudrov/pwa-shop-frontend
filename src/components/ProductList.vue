@@ -53,10 +53,15 @@ const addToCart = async (product) => {
   } catch (error) {
     const status = error?.response?.status
 
-    if (status === 401 || status === 403) {
-      alert('Чтобы добавить товар в корзину, сначала войдите в аккаунт.')
-      return
-    }
+    if (status === 401) {
+  alert('Сначала войдите в аккаунт.')
+  return
+}
+
+if (status === 403) {
+  alert('Доступ запрещён. Пользователь авторизован, но сервер не разрешает добавить товар в корзину.')
+  return
+}
 
     if (status === 400) {
       alert(error?.response?.data?.message || 'Не удалось добавить товар в корзину.')
