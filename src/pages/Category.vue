@@ -24,6 +24,13 @@
         class="product-card"
       >
         <div class="product-card__body">
+          <img
+            v-if="product.imageUrl"
+            :src="product.imageUrl"
+            :alt="product.name"
+            class="product-image"
+          />
+
           <h3>{{ product.name }}</h3>
 
           <p class="description">
@@ -36,19 +43,35 @@
               Остаток: {{ product.stockQuantity ?? product.quantity ?? '—' }}
             </span>
           </div>
+
+          <button
+            class="cart-btn"
+            :disabled="!product.available || product.stockQuantity <= 0"
+            @click="addToCart(product)"
+          >
+            {{ !product.available || product.stockQuantity <= 0 ? 'Нет в наличии' : 'В корзину' }}
+          </button>
         </div>
       </article>
     </div>
+
+    <p v-if="message" class="success">{{ message }}</p>
+    <p v-if="error" class="error">{{ error }}</p>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useProductStore } from '../store/productStore'
+import { useCartStore } from '../store/cartStore'
 
 const route = useRoute()
 const productsStore = useProductStore()
+const cart = useCartStore()
+
+const error = ref('')
+const message = ref('')
 
 const categoryId = computed(() => Number(route.params.id))
 
@@ -58,6 +81,9 @@ const categoryTitle = computed(() => {
 })
 
 const loadCategoryData = async () => {
+  error.value = ''
+  message.value = ''
+
   try {
     if (!productsStore.categories.length) {
       await productsStore.loadCategories()
@@ -65,7 +91,38 @@ const loadCategoryData = async () => {
 
     await productsStore.loadProductsByCategory(categoryId.value)
   } catch (e) {
+    error.value = 'Ошибка загрузки категории.'
     console.error('Ошибка загрузки категории', e)
+  }
+}
+
+const addToCart = async (product) => {
+  error.value = ''
+  message.value = ''
+
+  try {
+    const result = await cart.addProduct(product.id, 1)
+
+    if (result?.queuedOffline) {
+      message.value = 'Нет интернета. Товар сохранен локально и будет синхронизирован позже.'
+      return
+    }
+
+    message.value = `Товар "${product.name}" добавлен в корзину.`
+  } catch (err) {
+    const status = err?.response?.status
+
+    if (status === 401 || status === 403) {
+      error.value = 'Чтобы добавить товар в корзину, сначала войдите в аккаунт.'
+      return
+    }
+
+    if (status === 400) {
+      error.value = err?.response?.data?.message || 'Не удалось добавить товар в корзину.'
+      return
+    }
+
+    error.value = 'Не удалось добавить товар в корзину.'
   }
 }
 
@@ -139,15 +196,26 @@ h1 {
 
 .product-card__body {
   padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.product-image {
+  width: 100%;
+  height: 180px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #f7f7f7;
 }
 
 .product-card h3 {
-  margin: 0 0 10px;
+  margin: 0;
   font-size: 20px;
 }
 
 .description {
-  margin: 0 0 16px;
+  margin: 0;
   color: #666;
   min-height: 44px;
 }
@@ -168,5 +236,29 @@ h1 {
 .stock {
   color: #555;
   font-size: 14px;
+}
+
+.cart-btn {
+  border: none;
+  border-radius: 10px;
+  background: #111;
+  color: white;
+  padding: 12px 14px;
+  cursor: pointer;
+}
+
+.cart-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.success {
+  margin-top: 18px;
+  color: #2e7d32;
+}
+
+.error {
+  margin-top: 18px;
+  color: #c62828;
 }
 </style>
