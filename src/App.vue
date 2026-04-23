@@ -116,15 +116,5 @@ const logout = async () => {
   color: #555;
 }
 
-.user-meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-}
 
-.user-role {
-  font-size: 12px;
-  color: #777;
-}
 </style>
