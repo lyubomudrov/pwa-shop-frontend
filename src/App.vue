@@ -19,7 +19,11 @@
 
       <div class="nav-right">
         <template v-if="auth.isAuthenticated">
-          <span class="user-email">{{ auth.user?.email }}</span>
+          <div class="user-meta">
+            <span class="user-email">{{ auth.user?.email }}</span>
+            <span class="user-role">role: {{ auth.user?.role }}</span>
+            <span class="user-role">isAdmin: {{ auth.isAdmin }}</span>
+          </div>
           <button @click="logout">Выйти</button>
         </template>
 
@@ -112,5 +116,17 @@ const logout = async () => {
 .user-email {
   font-size: 14px;
   color: #555;
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.user-role {
+  font-size: 12px;
+  color: #777;
 }
 </style>
