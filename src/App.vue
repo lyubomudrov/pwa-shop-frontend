@@ -12,10 +12,10 @@
     <header class="site-header">
       <div class="site-header__inner">
         <RouterLink to="/" class="brand">
-          <span class="brand__badge">PWA</span>
+          <span class="brand__badge">DL</span>
           <span>
             <strong>PWA Shop</strong>
-            <small>магазин с корзиной, заказами и оффлайн-режимом</small>
+            <small>магазин с оффлайн-режимом</small>
           </span>
         </RouterLink>
 
@@ -283,6 +283,21 @@ const logout = async () => {
 .ghost-link {
   border: 1px solid var(--border-soft);
   background: white;
+}
+
+.ghost-button {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 4px;
+  color: var(--text-strong);
+  font-size: 14px;
+  font-weight: 400;
+  box-shadow: none;
+}
+
+.ghost-button:hover {
+  border-color: #111111;
+  box-shadow: none;
 }
 
 .primary-link {
