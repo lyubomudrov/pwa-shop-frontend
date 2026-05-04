@@ -14,7 +14,7 @@
         <RouterLink to="/" class="brand">
           <span class="brand__badge">DL</span>
           <span>
-            <strong>DL</strong>
+            <strong>DLL</strong>
             <small>магазин одежды с оффлайн-режимом</small>
           </span>
         </RouterLink>
