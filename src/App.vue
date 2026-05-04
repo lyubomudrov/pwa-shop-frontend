@@ -14,7 +14,7 @@
         <RouterLink to="/" class="brand">
           <span class="brand__badge">DL</span>
           <span>
-            <strong>PWA Shop</strong>
+            <strong>DL</strong>
             <small>магазин с оффлайн-режимом</small>
           </span>
         </RouterLink>
