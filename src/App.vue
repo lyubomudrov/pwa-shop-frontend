@@ -15,7 +15,7 @@
           <span class="brand__badge">DL</span>
           <span>
             <strong>DL</strong>
-            <small>магазин с оффлайн-режимом</small>
+            <small>магазин одежды с оффлайн-режимом</small>
           </span>
         </RouterLink>
 
