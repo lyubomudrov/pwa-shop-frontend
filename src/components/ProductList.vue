@@ -2,12 +2,12 @@
   <div class="product-list">
     <div v-if="loading" class="state-card">Загружаем товары...</div>
 
-    <div v-else-if="products.length === 0" class="state-card">
+    <div v-else-if="visibleProducts.length === 0" class="state-card">
       Пока нет товаров для отображения.
     </div>
 
     <div v-else class="grid">
-      <article v-for="product in products" :key="product.id" class="product-card">
+      <article v-for="product in visibleProducts" :key="product.id" class="product-card">
         <RouterLink :to="`/products/${product.id}`" class="product-card__image">
           <img v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" />
           <div v-else class="placeholder">Нет изображения</div>
@@ -41,7 +41,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { productService } from '../services/productService'
 import { useCartStore } from '../store/cartStore'
@@ -50,6 +50,28 @@ import localforage from 'localforage'
 const cart = useCartStore()
 const products = ref([])
 const loading = ref(true)
+const props = defineProps({
+  searchQuery: {
+    type: String,
+    default: '',
+  },
+})
+
+const visibleProducts = computed(() => {
+  const query = props.searchQuery.trim().toLowerCase()
+
+  if (!query) return products.value
+
+  return products.value.filter((product) => {
+    const fields = [
+      product.name,
+      product.description,
+      product.categoryName,
+    ]
+
+    return fields.some((field) => String(field || '').toLowerCase().includes(query))
+  })
+})
 
 const formatPrice = (value) =>
   new Intl.NumberFormat('ru-RU', {
@@ -111,9 +133,9 @@ onMounted(loadProducts)
 <style scoped>
 .state-card {
   padding: 24px;
-  border-radius: 22px;
+  border-radius: 4px;
   border: 1px solid var(--border-soft);
-  background: rgba(255, 255, 255, 0.78);
+  background: #ffffff;
   color: var(--text-soft);
 }
 
@@ -125,9 +147,9 @@ onMounted(loadProducts)
 
 .product-card {
   display: grid;
-  border-radius: 24px;
-  border: 1px solid rgba(28, 35, 32, 0.08);
-  background: rgba(255, 255, 255, 0.82);
+  border-radius: 4px;
+  border: 1px solid var(--border-soft);
+  background: #ffffff;
   overflow: hidden;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
@@ -139,9 +161,7 @@ onMounted(loadProducts)
 
 .product-card__image {
   min-height: 220px;
-  background:
-    radial-gradient(circle at top, rgba(239, 131, 84, 0.18), transparent 38%),
-    linear-gradient(180deg, #fff8ef, #eef5f1);
+  background: #f5f5f5;
   display: grid;
   place-items: center;
   padding: 20px;
@@ -206,7 +226,7 @@ onMounted(loadProducts)
   justify-content: center;
   min-height: 46px;
   padding: 0 16px;
-  border-radius: 14px;
+  border-radius: 4px;
   border: 1px solid var(--border-soft);
   background: white;
   color: var(--text-strong);

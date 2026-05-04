@@ -19,6 +19,16 @@
           </span>
         </RouterLink>
 
+        <form class="header-search" role="search" @submit.prevent="submitSearch">
+          <input
+            v-model="searchQuery"
+            type="search"
+            placeholder="Поиск"
+            aria-label="Поиск товаров"
+          />
+          <button type="submit">Найти</button>
+        </form>
+
         <nav class="nav">
           <RouterLink to="/">Главная</RouterLink>
           <RouterLink v-if="auth.isAuthenticated" to="/cart">
@@ -27,8 +37,8 @@
           <RouterLink v-if="auth.isAuthenticated" to="/checkout">Оформление</RouterLink>
           <RouterLink v-if="auth.isAuthenticated" to="/orders">Заказы</RouterLink>
           <RouterLink v-if="auth.isAuthenticated" to="/profile">Профиль</RouterLink>
-          <RouterLink v-if="auth.isAdmin" to="/admin/products">Админ: товары</RouterLink>
-          <RouterLink v-if="auth.isAdmin" to="/admin/categories">Админ: категории</RouterLink>
+          <RouterLink v-if="auth.isAdmin" to="/admin/products">Товары</RouterLink>
+          <RouterLink v-if="auth.isAdmin" to="/admin/categories">Категории</RouterLink>
         </nav>
 
         <div class="nav-right">
@@ -57,8 +67,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, watch } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './store/authStore'
 import { useCartStore } from './store/cartStore'
 import { useOnline } from './composables/useOnline'
@@ -66,13 +76,15 @@ import { useOnline } from './composables/useOnline'
 const auth = useAuthStore()
 const cart = useCartStore()
 const router = useRouter()
+const route = useRoute()
 const { isOnline } = useOnline()
+const searchQuery = ref('')
 const displayName = computed(() => {
   const firstName = auth.user?.firstName || ''
   const lastName = auth.user?.lastName || ''
   const fullName = `${firstName} ${lastName}`.trim()
 
-  return fullName || (auth.isAdmin ? 'Администратор' : 'Покупатель')
+  return fullName || auth.user?.email || ''
 })
 
 onMounted(async () => {
@@ -90,6 +102,23 @@ watch(isOnline, async (online) => {
     await cart.syncPendingActions()
   }
 })
+
+watch(
+  () => route.query.q,
+  (value) => {
+    searchQuery.value = typeof value === 'string' ? value : ''
+  },
+  { immediate: true }
+)
+
+const submitSearch = () => {
+  const query = searchQuery.value.trim()
+
+  router.push({
+    path: '/',
+    query: query ? { q: query } : {},
+  })
+}
 
 const logout = async () => {
   auth.logout()
@@ -123,19 +152,18 @@ const logout = async () => {
   position: sticky;
   top: 0;
   z-index: 10;
-  backdrop-filter: blur(14px);
-  background: rgba(248, 243, 231, 0.92);
-  border-bottom: 1px solid rgba(28, 35, 32, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--border-soft);
 }
 
 .site-header__inner {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 18px 20px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
@@ -158,12 +186,12 @@ const logout = async () => {
 }
 
 .brand__badge {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   display: inline-grid;
   place-items: center;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #1f6f5f, #ef8354);
+  border-radius: 4px;
+  background: #111111;
   color: white;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -173,8 +201,28 @@ const logout = async () => {
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
   flex-wrap: wrap;
+}
+
+.header-search {
+  flex: 1 1 260px;
+  max-width: 380px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-search input {
+  min-height: 40px;
+  padding: 0 12px;
+  border-color: rgba(17, 17, 17, 0.18);
+  background: #f6f6f6;
+}
+
+.header-search button {
+  min-height: 40px;
+  padding: 0 14px;
 }
 
 .nav :deep(a),
@@ -184,15 +232,15 @@ const logout = async () => {
   align-items: center;
   gap: 8px;
   min-height: 40px;
-  padding: 0 14px;
-  border-radius: 999px;
+  padding: 0 10px;
+  border-radius: 4px;
   color: var(--text-strong);
   text-decoration: none;
 }
 
 .nav :deep(a.router-link-active) {
-  background: rgba(31, 111, 95, 0.1);
-  color: var(--accent-strong);
+  background: #111111;
+  color: #ffffff;
 }
 
 .container {
@@ -208,7 +256,8 @@ const logout = async () => {
   border-radius: 999px;
   display: inline-grid;
   place-items: center;
-  background: rgba(31, 111, 95, 0.12);
+  background: #eeeeee;
+  color: #111111;
   font-size: 12px;
   font-weight: 700;
 }
@@ -232,12 +281,12 @@ const logout = async () => {
 
 .ghost-button,
 .ghost-link {
-  border: 1px solid rgba(28, 35, 32, 0.12);
+  border: 1px solid var(--border-soft);
   background: white;
 }
 
 .primary-link {
-  background: linear-gradient(135deg, #1f6f5f, #2d936c);
+  background: #111111;
   color: white;
 }
 

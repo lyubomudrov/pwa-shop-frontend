@@ -290,7 +290,7 @@ watch(productId, loadPage)
 .content-card,
 .state-card {
   border: 1px solid var(--border-soft);
-  border-radius: 28px;
+  border-radius: 6px;
   background: var(--surface);
   box-shadow: var(--shadow-soft);
 }
@@ -304,11 +304,9 @@ watch(productId, loadPage)
 
 .product-hero__media {
   min-height: 420px;
-  border-radius: 24px;
+  border-radius: 4px;
   overflow: hidden;
-  background:
-    radial-gradient(circle at top, rgba(239, 131, 84, 0.18), transparent 40%),
-    linear-gradient(180deg, #fff8ef, #eef5f1);
+  background: #f5f5f5;
   display: grid;
   place-items: center;
 }
@@ -360,9 +358,9 @@ watch(productId, loadPage)
 
 .stat-card {
   padding: 16px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(28, 35, 32, 0.06);
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid var(--border-soft);
 }
 
 .stat-card span {
@@ -389,7 +387,7 @@ watch(productId, loadPage)
   justify-content: center;
   min-height: 48px;
   padding: 0 18px;
-  border-radius: 14px;
+  border-radius: 4px;
   border: 1px solid var(--border-soft);
   background: white;
   color: var(--text-strong);
@@ -432,9 +430,9 @@ watch(productId, loadPage)
 
 .review-card {
   padding: 18px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(28, 35, 32, 0.08);
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid var(--border-soft);
 }
 
 .review-card__header {

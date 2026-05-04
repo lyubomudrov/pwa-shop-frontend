@@ -260,7 +260,7 @@ onMounted(loadPage)
 .hero-card,
 .panel {
   border: 1px solid var(--border-soft);
-  border-radius: 28px;
+  border-radius: 6px;
   background: var(--surface);
   box-shadow: var(--shadow-soft);
 }
@@ -296,9 +296,9 @@ onMounted(loadPage)
 .summary-card {
   min-width: 220px;
   padding: 20px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(28, 35, 32, 0.08);
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid var(--border-soft);
   display: grid;
   gap: 8px;
 }
@@ -348,9 +348,9 @@ onMounted(loadPage)
   gap: 16px;
   align-items: center;
   padding: 18px;
-  border-radius: 18px;
-  border: 1px solid rgba(28, 35, 32, 0.08);
-  background: rgba(255, 255, 255, 0.78);
+  border-radius: 4px;
+  border: 1px solid var(--border-soft);
+  background: #ffffff;
 }
 
 .address-card input {

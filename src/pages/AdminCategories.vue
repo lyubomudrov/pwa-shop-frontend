@@ -163,7 +163,7 @@ onMounted(reloadData)
 .admin-hero,
 .panel {
   border: 1px solid var(--border-soft);
-  border-radius: 28px;
+  border-radius: 6px;
   background: var(--surface);
   box-shadow: var(--shadow-soft);
 }
@@ -233,8 +233,8 @@ onMounted(reloadData)
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: rgba(31, 111, 95, 0.12);
-  color: var(--accent-strong);
+  background: #eeeeee;
+  color: #111111;
   font-weight: 700;
 }
 
@@ -243,9 +243,9 @@ onMounted(reloadData)
   justify-content: space-between;
   gap: 16px;
   padding: 18px;
-  border-radius: 18px;
-  border: 1px solid rgba(28, 35, 32, 0.08);
-  background: rgba(255, 255, 255, 0.78);
+  border-radius: 4px;
+  border: 1px solid var(--border-soft);
+  background: #ffffff;
 }
 
 .category-row__main {
@@ -264,7 +264,7 @@ onMounted(reloadData)
   justify-content: center;
   min-height: 46px;
   padding: 0 16px;
-  border-radius: 14px;
+  border-radius: 4px;
   text-decoration: none;
   border: 1px solid var(--border-soft);
   background: white;

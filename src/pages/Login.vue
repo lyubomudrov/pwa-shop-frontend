@@ -62,23 +62,55 @@ const submit = async () => {
 
 <style scoped>
 .auth-page {
-  max-width: 420px;
-  margin: 40px auto;
+  max-width: 474px;
+  margin: 64px auto;
 }
+
+.auth-page h1 {
+  margin: 0 0 28px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 400;
+}
+
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
 }
+
+.auth-form label {
+  display: grid;
+  gap: 8px;
+  color: #777777;
+  font-size: 12px;
+  font-weight: 400;
+}
+
 input {
   width: 100%;
-  padding: 10px;
+  padding: 12px 0;
   box-sizing: border-box;
+  border-width: 0 0 1px;
+  border-radius: 0;
+  background: transparent;
 }
+
+input:focus {
+  outline: none;
+  border-color: #111111;
+}
+
 button {
-  padding: 10px 14px;
+  min-height: 52px;
+  margin-top: 220px;
+  padding: 0 14px;
+  border-radius: 4px;
+  font-weight: 400;
 }
+
 .error {
   color: #c62828;
+  font-size: 12px;
 }
 </style>

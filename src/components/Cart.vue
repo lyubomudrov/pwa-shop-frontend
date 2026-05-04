@@ -86,7 +86,7 @@ const remove = async (itemId) => {
 .panel,
 .empty-card {
   border: 1px solid var(--border-soft);
-  border-radius: 28px;
+  border-radius: 6px;
   background: var(--surface);
   box-shadow: var(--shadow-soft);
 }
@@ -124,9 +124,9 @@ const remove = async (itemId) => {
 .summary-card {
   min-width: 220px;
   padding: 20px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(28, 35, 32, 0.08);
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid var(--border-soft);
   display: grid;
   gap: 8px;
 }
@@ -146,12 +146,12 @@ const remove = async (itemId) => {
   justify-content: center;
   min-height: 46px;
   padding: 0 16px;
-  border-radius: 14px;
+  border-radius: 4px;
   text-decoration: none;
 }
 
 .checkout-link {
-  background: linear-gradient(135deg, #1f6f5f, #2d936c);
+  background: #111111;
   color: white;
 }
 
@@ -177,9 +177,9 @@ const remove = async (itemId) => {
   gap: 16px;
   align-items: center;
   padding: 18px;
-  border-radius: 18px;
-  border: 1px solid rgba(28, 35, 32, 0.08);
-  background: rgba(255, 255, 255, 0.78);
+  border-radius: 4px;
+  border: 1px solid var(--border-soft);
+  background: #ffffff;
 }
 
 .item-actions {

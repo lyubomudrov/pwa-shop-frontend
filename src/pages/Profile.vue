@@ -16,10 +16,6 @@
           <span>Заказов</span>
           <strong>{{ userStore.orders.length }}</strong>
         </div>
-        <div class="summary-card">
-          <span>Роль</span>
-          <strong>{{ auth.isAdmin ? 'Администратор' : 'Покупатель' }}</strong>
-        </div>
       </div>
     </section>
 
@@ -193,7 +189,7 @@ onMounted(loadPage)
 .hero-card,
 .panel {
   border: 1px solid var(--border-soft);
-  border-radius: 28px;
+  border-radius: 6px;
   background: var(--surface);
   box-shadow: var(--shadow-soft);
 }
@@ -226,15 +222,15 @@ onMounted(loadPage)
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
 
 .summary-card {
-  border-radius: 18px;
+  border-radius: 4px;
   padding: 18px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(28, 35, 32, 0.08);
+  background: #ffffff;
+  border: 1px solid var(--border-soft);
 }
 
 .summary-card span {
@@ -285,9 +281,9 @@ onMounted(loadPage)
   gap: 16px;
   align-items: center;
   padding: 18px;
-  border-radius: 18px;
-  border: 1px solid rgba(28, 35, 32, 0.08);
-  background: rgba(255, 255, 255, 0.76);
+  border-radius: 4px;
+  border: 1px solid var(--border-soft);
+  background: #ffffff;
 }
 
 .address-card p,

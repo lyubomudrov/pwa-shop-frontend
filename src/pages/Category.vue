@@ -161,7 +161,7 @@ watch(() => route.params.id, loadCategoryData)
 .hero-card,
 .section-card {
   border: 1px solid var(--border-soft);
-  border-radius: 28px;
+  border-radius: 6px;
   background: var(--surface);
   box-shadow: var(--shadow-soft);
 }
@@ -207,7 +207,7 @@ watch(() => route.params.id, loadCategoryData)
   justify-content: center;
   min-height: 46px;
   padding: 0 16px;
-  border-radius: 14px;
+  border-radius: 4px;
   border: 1px solid var(--border-soft);
   background: white;
   color: var(--text-strong);
@@ -220,8 +220,8 @@ watch(() => route.params.id, loadCategoryData)
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  background: rgba(31, 111, 95, 0.12);
-  color: var(--accent-strong);
+  background: #eeeeee;
+  color: #111111;
   font-weight: 700;
 }
 
@@ -237,9 +237,9 @@ watch(() => route.params.id, loadCategoryData)
 
 .product-card {
   display: grid;
-  border-radius: 24px;
-  border: 1px solid rgba(28, 35, 32, 0.08);
-  background: rgba(255, 255, 255, 0.82);
+  border-radius: 4px;
+  border: 1px solid var(--border-soft);
+  background: #ffffff;
   overflow: hidden;
 }
 
@@ -247,9 +247,7 @@ watch(() => route.params.id, loadCategoryData)
   min-height: 220px;
   display: grid;
   place-items: center;
-  background:
-    radial-gradient(circle at top, rgba(239, 131, 84, 0.18), transparent 38%),
-    linear-gradient(180deg, #fff8ef, #eef5f1);
+  background: #f5f5f5;
   padding: 20px;
 }
 

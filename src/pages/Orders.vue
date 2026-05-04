@@ -105,7 +105,7 @@ onMounted(loadOrders)
 .panel,
 .empty-card {
   border: 1px solid var(--border-soft);
-  border-radius: 28px;
+  border-radius: 6px;
   background: var(--surface);
   box-shadow: var(--shadow-soft);
 }
@@ -145,9 +145,9 @@ onMounted(loadOrders)
   justify-content: center;
   min-height: 48px;
   padding: 0 18px;
-  border-radius: 14px;
+  border-radius: 4px;
   text-decoration: none;
-  background: linear-gradient(135deg, #1f6f5f, #2d936c);
+  background: #111111;
   color: white;
 }
 
@@ -162,10 +162,10 @@ onMounted(loadOrders)
 }
 
 .order-card {
-  border: 1px solid rgba(28, 35, 32, 0.08);
-  border-radius: 20px;
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.78);
+  background: #ffffff;
 }
 
 .order-header,
@@ -188,8 +188,8 @@ onMounted(loadOrders)
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  background: rgba(31, 111, 95, 0.12);
-  color: var(--accent-strong);
+  background: #eeeeee;
+  color: #111111;
   font-weight: 700;
 }
 

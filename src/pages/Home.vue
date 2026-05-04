@@ -32,10 +32,6 @@
           <span>Товаров</span>
           <strong>{{ productsStore.products.length }}</strong>
         </div>
-        <div class="metric-card">
-          <span>Статус</span>
-          <strong>{{ auth.isAdmin ? 'Администратор' : auth.isAuthenticated ? 'Покупатель' : 'Гость' }}</strong>
-        </div>
       </div>
     </section>
 
@@ -78,20 +74,22 @@
         </div>
       </div>
 
-      <ProductList />
+      <ProductList :search-query="searchQuery" />
     </section>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
 import ProductList from '../components/ProductList.vue'
 import { useProductStore } from '../store/productStore'
 import { useAuthStore } from '../store/authStore'
 
 const productsStore = useProductStore()
 const auth = useAuthStore()
+const route = useRoute()
+const searchQuery = computed(() => (typeof route.query.q === 'string' ? route.query.q : ''))
 
 const reloadData = async () => {
   try {
@@ -113,7 +111,7 @@ onMounted(reloadData)
 .hero,
 .section {
   border: 1px solid var(--border-soft);
-  border-radius: 30px;
+  border-radius: 6px;
   background: var(--surface);
   box-shadow: var(--shadow-soft);
 }
@@ -123,9 +121,7 @@ onMounted(reloadData)
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 24px;
-  background:
-    radial-gradient(circle at top right, rgba(239, 131, 84, 0.24), transparent 30%),
-    linear-gradient(135deg, rgba(31, 111, 95, 0.06), rgba(255, 255, 255, 0.88));
+  background: linear-gradient(135deg, #ffffff, #f5f5f5);
 }
 
 .eyebrow {
@@ -163,11 +159,11 @@ onMounted(reloadData)
   min-height: 48px;
   padding: 0 18px;
   text-decoration: none;
-  border-radius: 14px;
+  border-radius: 4px;
 }
 
 .primary-link {
-  background: linear-gradient(135deg, #1f6f5f, #2d936c);
+  background: #111111;
   color: white;
 }
 
@@ -184,9 +180,9 @@ onMounted(reloadData)
 
 .metric-card {
   padding: 20px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(28, 35, 32, 0.08);
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid var(--border-soft);
 }
 
 .metric-card span {
@@ -230,9 +226,9 @@ onMounted(reloadData)
 .category-card {
   display: block;
   padding: 20px;
-  border-radius: 22px;
-  border: 1px solid rgba(28, 35, 32, 0.08);
-  background: rgba(255, 255, 255, 0.82);
+  border-radius: 4px;
+  border: 1px solid var(--border-soft);
+  background: #ffffff;
   color: inherit;
   text-decoration: none;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
